@@ -7,6 +7,7 @@ fn create() {
 }
 
 #[test]
+#[cfg(feature = "std")]
 fn create_once_with_reuse() {
     icell::runtime_id!(type Once(()););
     icell::global_reuse!(type OnceReuse(Once));

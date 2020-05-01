@@ -73,6 +73,7 @@ crate::runtime_id! {
 #[cfg(feature = "std")]
 pub type GlobalOwner = crate::Owner<Runtime<SmallGlobal, GlobalReuse>>;
 pub type Owner<I = Global, R = NoOpReuse> = crate::Owner<Runtime<I, R>>;
+#[cfg(feature = "std")]
 pub type GlobalICell<T, I = SmallGlobal> = crate::ICell<RuntimeId<I>, T>;
 pub type ICell<T, I = Global> = crate::ICell<RuntimeId<I>, T>;
 

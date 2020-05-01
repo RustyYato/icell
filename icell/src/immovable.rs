@@ -1,4 +1,4 @@
-use std::mem::MaybeUninit;
+use core::mem::MaybeUninit;
 
 pub type Owner<Im = MaybeUninit<u8>> = crate::Owner<Immovable<Im>>;
 pub type ICell<T> = crate::ICell<Address, T>;
@@ -24,7 +24,7 @@ impl<Im> Immovable<Im> {
     pub const fn with_value(value: Im) -> Self {
         // assert that the size is non-zero
         // any value with a non-zero size will have a unique address
-        [()][(std::mem::size_of::<Im>() == 0) as usize];
+        [()][(core::mem::size_of::<Im>() == 0) as usize];
         unsafe { Self::with_value_unchecked(value) }
     }
 
