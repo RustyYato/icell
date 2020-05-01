@@ -1,7 +1,7 @@
-use icell::generative::{self as gen, ICell};
+use icell::scoped::{self, ICell};
 
 fn main() {
-    gen::new!(owner);
+    scoped::owner!(owner);
     let value = ICell::new(10);
 
     let x = owner.read(&value);

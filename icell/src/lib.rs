@@ -24,9 +24,9 @@ pub use self::core::{ICell, Identifier, Owner, Transparent};
 #[doc(hidden)]
 pub mod hlist;
 
-pub mod generative;
 pub mod immovable;
 pub mod runtime;
+pub mod scoped;
 pub mod typeid;
 #[cfg(feature = "std")]
 pub mod typeid_tl;

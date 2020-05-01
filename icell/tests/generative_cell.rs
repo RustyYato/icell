@@ -1,17 +1,17 @@
 use icell::{
-    generative::{self, ICell},
+    scoped::{self, ICell},
     write_all,
 };
 
 #[test]
 fn create() {
-    generative::new!(owner);
+    scoped::owner!(owner);
     assert_eq!(std::mem::size_of_val(&owner), 0);
 }
 
 #[test]
 fn read() {
-    generative::new!(owner);
+    scoped::owner!(owner);
     assert_eq!(std::mem::size_of_val(&owner), 0);
 
     let cell = ICell::<u32>::new(0xdead_beef);
@@ -21,7 +21,7 @@ fn read() {
 
 #[test]
 fn write() {
-    generative::new!(owner);
+    scoped::owner!(owner);
     assert_eq!(std::mem::size_of_val(&owner), 0);
 
     let cell = ICell::<u32>::new(0xdead_beef);
@@ -34,7 +34,7 @@ fn write() {
 
 #[test]
 fn write_all() {
-    generative::new!(owner);
+    scoped::owner!(owner);
     assert_eq!(std::mem::size_of_val(&owner), 0);
 
     let a = ICell::<u32>::new(0xdead_beef);

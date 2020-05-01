@@ -1,0 +1,34 @@
+error[E0495]: cannot infer an appropriate lifetime for lifetime parameter `'a` due to conflicting requirements
+  --> $DIR/distinct_lifetimes-2.rs:8:17
+   |
+8  |             foo.read(&value);
+   |                 ^^^^
+   |
+note: first, the lifetime cannot outlive the anonymous lifetime #2 defined on the body at 7:22...
+  --> $DIR/distinct_lifetimes-2.rs:7:22
+   |
+7  |           scoped::with(|bar| {
+   |  ______________________^
+8  | |             foo.read(&value);
+9  | |             bar.read(&value);
+10 | |         });
+   | |_________^
+note: ...but the lifetime must also be valid for the anonymous lifetime #2 defined on the body at 4:18...
+  --> $DIR/distinct_lifetimes-2.rs:4:18
+   |
+4  |       scoped::with(|foo| {
+   |  __________________^
+5  | |         let value = ICell::new(10);
+6  | |
+7  | |         scoped::with(|bar| {
+...  |
+10 | |         });
+11 | |     });
+   | |_____^
+note: ...so that the types are compatible
+  --> $DIR/distinct_lifetimes-2.rs:9:17
+   |
+9  |             bar.read(&value);
+   |                 ^^^^
+   = note: expected  `icell::core::Identifier`
+              found  `icell::core::Identifier`
