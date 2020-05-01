@@ -6,6 +6,7 @@ fn compile_fail() {
 
     cases.compile_fail("tests/compile_fail/runtime/*.rs");
     cases.compile_fail("tests/compile_fail/scoped/*.rs");
+    cases.compile_fail("tests/compile_fail/immovable/*.rs");
     cases.compile_fail("tests/compile_fail/typeid/*.rs");
     #[cfg(feature = "std")]
     cases.compile_fail("tests/compile_fail/typeid-tl/*.rs");
