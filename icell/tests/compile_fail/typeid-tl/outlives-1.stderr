@@ -1,0 +1,11 @@
+error[E0505]: cannot move out of `owner` because it is borrowed
+  --> $DIR/outlives-1.rs:11:10
+   |
+9  |     let x = owner.read(&value);
+   |             ----- borrow of `owner` occurs here
+10 | 
+11 |     drop(owner);
+   |          ^^^^^ move out of `owner` occurs here
+12 | 
+13 |     assert_eq!(*x, 10);
+   |     ------------------- borrow later used here
