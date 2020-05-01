@@ -46,7 +46,21 @@ jobs:
     - uses: actions-rs/toolchain@v1
       with:
         profile: minimal
-        toolchain: nightly
+        toolchain: stable
         components: rustfmt
     - name: Format
       run: cargo fmt --verbose -- --check
+
+  miri:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@master
+    - uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: nightly
+        components: miri
+    - name: Miri Test
+      run: cd icell; cargo +nightly miri test --verbose

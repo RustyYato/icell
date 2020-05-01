@@ -1,6 +1,7 @@
 use trybuild::TestCases;
 
 #[test]
+#[cfg_attr(miri, ignore)]
 fn compile_fail() {
     let cases = TestCases::new();
 
