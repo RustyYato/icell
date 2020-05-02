@@ -4,6 +4,12 @@ use icell::{
 };
 
 #[test]
+fn foo() {
+    typeid::make!(type Foo);
+    let icell = Foo::owner();
+}
+
+#[test]
 fn create() {
     typeid::make!(type TestCreate);
 
