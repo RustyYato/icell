@@ -1,21 +1,40 @@
 use crate::hlist::*;
 use core::cell::UnsafeCell;
 
+/// Represents a unique identifier that can be used by an `Owner` to recognize an `ICell`
+///
+/// # Safety
+///
+/// Given two instances of `a, b: Identifier`, the following proposition must hold:
+///
+/// Forall instances of `Identifier` `a` and `b`, if `Identifier::check_id(&a) && Identifier::check_id(&b)`
+/// and `a` is alive on the same thread as `b` then an exclusive/shared borrow of `a`, must also exclusively/shared
+/// borrow `b` at least as long as `a` (respectively)
 pub unsafe trait Identifier {
+    /// The ICell identifier that this `Identifier` recognizes.
     type Id;
 
+    /// Get an instance in `Self::Id` that `check_id` will recognize.
     fn id(&self) -> Self::Id;
 
+    /// check if the given `Self::Id` matches the given `Identifier`
     fn check_id(&self, id: &Self::Id) -> bool;
 }
 
-pub unsafe trait Transparent {}
+/// Represents an `Identifier::Id` that can be forged from the void.
+///
+/// # Safety
+///
+/// If `size_of::<Self>() == 0`, then it must be safe to forge instances of`<Self as Identifier>::Id`
+pub unsafe trait Transparent: Copy {}
 
+/// An owner that can be used to access the contents of an `ICell`
 #[repr(transparent)]
 pub struct Owner<I> {
-    pub ident: I,
+    ident: I,
 }
 
+/// A sort of `Cell` that must be access with an `Owner`
 #[repr(C)]
 pub struct ICell<Id, T: ?Sized> {
     id: Id,
@@ -142,16 +161,34 @@ impl<Id: Transparent, T> ICell<Id, T> {
         // safety constraints on creating an `Id`
         #[allow(deprecated)]
         unsafe {
-            Self::from_raw_parts(core::mem::uninitialized(), value)
+            let id = core::ptr::read(core::mem::align_of::<Id>() as *const Id);
+            Self::from_raw_parts(id, value)
         }
     }
+}
 
-    pub fn from_mut_slice(value: &mut [T]) -> &mut [Self] {
+impl<Id: Transparent, T> ICell<Id, [T]> {
+    pub fn as_slice_of_cells(&self) -> &[ICell<Id, T>] {
         assert_eq!(core::mem::size_of::<Id>(), 0);
 
         #[allow(clippy::transmute_ptr_to_ptr)]
         unsafe {
-            core::mem::transmute(value)
+            let ptr = self.value.get();
+            let len = (*ptr).len();
+            let ptr = ptr.cast::<ICell<Id, T>>();
+            core::slice::from_raw_parts(ptr, len)
+        }
+    }
+
+    pub fn as_slice_of_cells_mut(&mut self) -> &mut [ICell<Id, T>] {
+        assert_eq!(core::mem::size_of::<Id>(), 0);
+
+        #[allow(clippy::transmute_ptr_to_ptr)]
+        unsafe {
+            let ptr = self.value.get();
+            let len = (*ptr).len();
+            let ptr = ptr.cast::<ICell<Id, T>>();
+            core::slice::from_raw_parts_mut(ptr, len)
         }
     }
 }

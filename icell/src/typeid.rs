@@ -79,7 +79,47 @@ pub mod macros {
         };
         use std::cell::UnsafeCell;
         use std::mem::MaybeUninit;
-        use std::sync::{Condvar, Mutex, Once};
+        #[cfg(not(miri))]
+        use std::sync::Condvar;
+        use std::sync::Once;
+
+        #[cfg(not(miri))]
+        type Mutex = std::sync::Mutex<()>;
+
+        #[cfg(miri)]
+        use miri_sync::*;
+        #[cfg(miri)]
+        mod miri_sync {
+            pub struct Mutex(u8);
+
+            pub struct Condvar(u8);
+
+            impl Mutex {
+                pub fn new((): ()) -> Self {
+                    Self(0)
+                }
+
+                pub fn lock(&self) -> Option<()> {
+                    assert_eq!(self.0, 0);
+                    Some(())
+                }
+            }
+
+            impl Condvar {
+                pub fn new() -> Self {
+                    Self(0)
+                }
+
+                pub fn wait_while<F>(&self, (): (), f: F) -> Option<()> {
+                    assert_eq!(self.0, 0);
+                    Some(())
+                }
+
+                pub fn notify_one(&self) {
+                    assert_eq!(self.0, 0);
+                }
+            }
+        }
 
         thread_local! {
             static THREAD_ID: MaybeUninit<u8> = MaybeUninit::uninit();
@@ -94,7 +134,7 @@ pub mod macros {
             AtomicBool,
             AtomicUsize,
             UnsafeCell<MaybeUninit<Condvar>>,
-            UnsafeCell<MaybeUninit<Mutex<()>>>,
+            UnsafeCell<MaybeUninit<Mutex>>,
         );
 
         unsafe impl Send for Flag {}
@@ -139,7 +179,7 @@ pub mod macros {
                 let Self(_, st, thread_id, cv, mx) = self;
 
                 let cv = &*cv.get().cast::<Condvar>();
-                let mx = &*mx.get().cast::<Mutex<()>>();
+                let mx = &*mx.get().cast::<Mutex>();
 
                 if thread_id.load(Relaxed) == get_thread_id() {
                     // reentrant acquire, we can't make an owner if there is already
@@ -170,7 +210,6 @@ pub mod macros {
 
                 // if we are running miri, we are single threaded, so we don't need to notify
                 // also miri doesn't handle notify at all
-                #[cfg(not(miri))]
                 cv.notify_one();
             }
         }
